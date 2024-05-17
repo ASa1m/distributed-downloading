@@ -136,16 +136,19 @@ Run the `main.py` script and select the "Coordinator" role. The coordinator will
 ```sh
 python main.py
 ```
+![alt text](readme/image.png)
 
 ### Step 4: Start the Workers
 Run the `main.py` script on worker machines, select the "Worker" role, and enter the coordinator's IP address. Each worker will start downloading its assigned part of the file and send it back to the coordinator.
 ```sh
 python main.py
 ```
+![alt text](readme/image2.png)
 
 ### Step 5: Monitor the Progress
 The GUI will display the progress of file downloading and combining operations. 
 
+![alt text](readme/image3.png)
 ---
 
 ## 9. Future Improvements
