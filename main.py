@@ -10,11 +10,14 @@ from tqdm import tqdm
 PROGRESS = {}
 TASKS = []
 WORKERS = []
+TRACKER_PORT = 3000
 
 class WorkerGUI:
     def __init__(self, master, num_parts=2):
         self.master = master
         master.title("Worker Status")
+
+        # set display size
 
         master.protocol("WM_DELETE_WINDOW", self.on_closing)
         
@@ -31,7 +34,7 @@ class WorkerGUI:
     # if worker window is closed, unregister worker
     def on_closing(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect((COORDINATOR_IP, 3000))
+            s.connect((COORDINATOR_IP, TRACKER_PORT))
             s.sendall(b'WORKER_UNREGISTER')
             response = s.recv(1024).decode()
             if response == 'UNREGISTERED':
@@ -101,6 +104,7 @@ class CoordinatorGUI:
         my_ip = socket.gethostbyname(socket.gethostname())
 
         self.master = master
+
         master.title("Coordinator Status")
 
         self.label = Label(master, text="Coordinator IP:" + my_ip)
@@ -209,15 +213,18 @@ class RoleSelectorGUI:
     def __init__(self, master):
         self.master = master
         master.title("Select Role")
+
+        # set display size
+        master.geometry("300x130")
         
         self.label = Label(master, text="Select Role:")
         self.label.pack(pady=10)
         
-        self.worker_button = Button(master, text="Worker", command=self.worker)
-        self.worker_button.pack(pady=5)
+        self.worker_button = Button(master, text="Worker", command=self.worker, width=50)
+        self.worker_button.pack(pady=5, padx=10)
         
-        self.coordinator_button = Button(master, text="Coordinator", command=self.coordinator)
-        self.coordinator_button.pack(pady=5)
+        self.coordinator_button = Button(master, text="Coordinator", command=self.coordinator, width=50)
+        self.coordinator_button.pack(pady=5, padx=10)
 
     def worker(self):
         self.master.destroy()
@@ -239,7 +246,7 @@ class RoleSelectorGUI:
                 coordinator_ip.set(ip)
                 # tell coordinator that worker is ready
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                    s.connect((ip, 3000))
+                    s.connect((ip, TRACKER_PORT))
                     s.sendall(b'WORKER_REGISTER')
                     response = s.recv(1024).decode()
                     if response == 'REGISTERED':
@@ -255,15 +262,17 @@ class RoleSelectorGUI:
         
         ip_window = Tk()
         ip_window.title("Enter Coordinator IP")
+
+        ip_window.geometry("300x100")
         
         label = Label(ip_window, text="Coordinator IP:")
         label.pack(pady=5)
         
-        ip_entry = Entry(ip_window)
-        ip_entry.pack(pady=5)
+        ip_entry = Entry(ip_window, width=50)
+        ip_entry.pack(pady=5, padx=10)
         
-        submit_button = Button(ip_window, text="Submit", command=on_submit)
-        submit_button.pack(pady=10)
+        submit_button = Button(ip_window, text="Submit", command=on_submit, width=50)
+        submit_button.pack(pady=10, padx=10)
         
         ip_window.mainloop()
         return coordinator_ip.get()
@@ -331,7 +340,7 @@ def start_coordinator():
 
     # create thread to keeoo track of workers
     
-    threading.Thread(target=start_tracker_server, args=('0.0.0.0', 3000)).start()
+    threading.Thread(target=start_tracker_server, args=('0.0.0.0', TRACKER_PORT)).start()
     
     root = Tk()
     gui = CoordinatorGUI(root)
