@@ -10,6 +10,7 @@
 7. Dependencies
 8. Running the Project
 9. Future Improvements
+10. Conclusion
 
 ---
 
@@ -117,13 +118,32 @@ pip install requests tqdm
 
 ## 8. Running the Project
 
-### Step 1: Start the Coordinator
+### Step 1: Clone the Repository
+Clone the repository to your local machine using the following command:
+```sh
+git clone https://github.com/Asa1m/distributed-downloading
+```
+
+### Step 2: Navigate to the Project Directory
+Navigate to the project directory using:
+```sh
+cd distributed-downloading
+```
+
+
+### Step 3: Start the Coordinator
 Run the `main.py` script and select the "Coordinator" role. The coordinator will divide the file into parts and wait for workers to connect.
+```sh
+python main.py
+```
 
-### Step 2: Start the Workers
+### Step 4: Start the Workers
 Run the `main.py` script on worker machines, select the "Worker" role, and enter the coordinator's IP address. Each worker will start downloading its assigned part of the file and send it back to the coordinator.
+```sh
+python main.py
+```
 
-### Step 3: Monitor the Progress
+### Step 5: Monitor the Progress
 The GUI will display the progress of file downloading and combining operations. 
 
 ---
@@ -135,3 +155,7 @@ The GUI will display the progress of file downloading and combining operations.
 - **Security**: Implement security measures such as SSL for secure communication between nodes.
 - **Scalability**: Optimize the system for handling larger files and more worker nodes.
 - **Configuration**: Add a configuration file for easy setup and customization.
+
+## 10. Conclusion
+
+This project demonstrates the concept of distributed downloading using a coordinator-worker model. By leveraging parallel processing across multiple nodes, the system accelerates file downloading and showcases the benefits of distributed systems in real-world applications.

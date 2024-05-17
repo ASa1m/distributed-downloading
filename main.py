@@ -1,4 +1,3 @@
-# main.py
 import socket
 import json
 import requests
@@ -6,7 +5,7 @@ import sys
 import os
 import threading
 from tkinter import Tk, Label, Button, Entry, StringVar, ttk, messagebox
-from tqdm import tqdm\
+from tqdm import tqdm
 
 PROGRESS = {}
 TASKS = []
@@ -32,7 +31,7 @@ class WorkerGUI:
     # if worker window is closed, unregister worker
     def on_closing(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect((COORDINATOR_IP, 5002))
+            s.connect((COORDINATOR_IP, 3000))
             s.sendall(b'WORKER_UNREGISTER')
             response = s.recv(1024).decode()
             if response == 'UNREGISTERED':
@@ -134,7 +133,7 @@ class CoordinatorGUI:
     def start_download(self):
         url = self.url_entry.get()
         if url:
-            threading.Thread(target=start_distributed_download, args=(url, url.split('/')[-1].replace('%20', ' '), 1, WORKERS, self)).start()
+            threading.Thread(target=start_distributed_download, args=(url, url.split('/')[-1].replace('%20', ' '), NUM_PARTS, WORKERS, self)).start()
         else:
             self.update_status("Please enter a valid URL.")
 
@@ -240,7 +239,7 @@ class RoleSelectorGUI:
                 coordinator_ip.set(ip)
                 # tell coordinator that worker is ready
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                    s.connect((ip, 5002))
+                    s.connect((ip, 3000))
                     s.sendall(b'WORKER_REGISTER')
                     response = s.recv(1024).decode()
                     if response == 'REGISTERED':
@@ -311,13 +310,16 @@ def handle_client_connection(client_socket):
 
 def handle_worker_unregistration(worker_socket):
     global WORKERS
+    global NUM_PARTS
     worker_ip = worker_socket.getpeername()[0]
     worker_socket.sendall(b'UNREGISTERED')
     WORKERS = [worker for worker in WORKERS if worker['ip'] != worker_ip]
+    NUM_PARTS = len(WORKERS)
     print(f'Worker {worker_ip} unregistered.')
 
 def handle_worker_connection(worker_socket):
     global WORKERS
+    global NUM_PARTS
     worker_ip = worker_socket.getpeername()[0]
     worker_socket.sendall(b'REGISTERED')
     WORKERS.append({'ip': worker_ip, 'port': 5000})
@@ -329,7 +331,7 @@ def start_coordinator():
 
     # create thread to keeoo track of workers
     
-    threading.Thread(target=start_tracker_server, args=('0.0.0.0', 5002)).start()
+    threading.Thread(target=start_tracker_server, args=('0.0.0.0', 3000)).start()
     
     root = Tk()
     gui = CoordinatorGUI(root)
